@@ -42,13 +42,15 @@ class LogisticModel(models.BaseModel):
       model in the 'predictions' key. The dimensions of the tensor are
       batch_size x num_classes."""
     with slim.arg_scope([slim.fully_connected],
-                      activation_fn=tf.nn.sigmoid,
+                      activation_fn=tf.nn.relu,
                       weights_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                       weights_regularizer=slim.l2_regularizer(l2_penalty)):
       # output = slim.repeat(model_input, 2, slim.conv2d, 64, [3, 3])
       output = slim.fully_connected(model_input, vocab_size)
       output = slim.dropout(output, 0.5)
       output = slim.fully_connected(model_input, vocab_size)
+      output = slim.dropout(output, 0.5)
+      output = slim.fully_connected(model_input, vocab_size, activation_fn=None)
     return {"predictions": output}
 
 class MoeModel(models.BaseModel):
