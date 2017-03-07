@@ -41,10 +41,14 @@ class LogisticModel(models.BaseModel):
       A dictionary with a tensor containing the probability predictions of the
       model in the 'predictions' key. The dimensions of the tensor are
       batch_size x num_classes."""
-    output = slim.fully_connected(
-        model_input, vocab_size, activation_fn=tf.nn.sigmoid,
-        weights_regularizer=slim.l2_regularizer(l2_penalty))
-    output = slim.dropout(output, 0.5)
+    with slim.arg_scope([slim.conv2d, slim.fully_connected],
+                      activation_fn=tf.nn.sigmoid,
+                      weights_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                      weights_regularizer=slim.l2_regularizer(l2_penalty)):
+      # output = slim.repeat(model_input, 2, slim.conv2d, 64, [3, 3])
+      output = slim.fully_connected(model_input, vocab_size)
+      output = slim.dropout(output, 0.5)
+      output = slim.fully_connected(model_input, vocab_size)
     return {"predictions": output}
 
 class MoeModel(models.BaseModel):
